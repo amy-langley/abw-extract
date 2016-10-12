@@ -8,8 +8,7 @@ const rows = parsed.data
 // console.log(rows[Math.floor(rows.length/2)])
 
 var results = []
-var good = 0;
-var bad = 0;
+var yes = 0, no = 0
 
 for(let val of rows){
 
@@ -30,14 +29,28 @@ for(let val of rows){
   let source_file, start_time, date, gate, tape
   ({source_file, start_time, date, gate, tape} = subject_data[subject_id])
 
-  var inits = JP.query(annotations, `$[?(@.task=="init")].value`)
-  if(inits.length < 1){
-    console.log("no match task, trying key")
-    var inits = JP.query(annotations, `$[?(@.key=="init")].value`)
-  }
-
+  let inits = tryMultiple(annotations, `$[?(@.task=="init")].value`,`$[?(@.key=="init")].value`)
+  let t1s = tryMultiple(annotations, `$[?(@.task=="T1")].value`,`$[?(@.key=="T1")].value`)
+  let t2s = tryMultiple(annotations, `$[?(@.task=="T2")].value`,`$[?(@.key=="T2")].value`)
 
 }
 
-console.log("good",good)
-console.log("bad",bad)
+function flatten(maybeArray){
+  if(maybeArray && maybeArray[0] && maybeArray[0] instanceof Array)
+    return flatten(maybeArray[0])
+
+  return maybeArray || []
+}
+
+function tryMultiple(searchObj, ...queries){
+  var result = []
+  var query
+  while(result.length < 1 && (query = queries.shift())){
+    result = JP.query(searchObj, query)
+  }
+
+  return flatten(result)
+}
+
+console.log('yes', yes)
+console.log('no', no)
